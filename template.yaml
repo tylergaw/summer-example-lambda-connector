@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: London Metro Fetch function
+
+Globals:
+  Function:
+    Timeout: 300
+    MemorySize: 128
+
+    LoggingConfig:
+      LogFormat: JSON
+Resources:
+  LondonMetroFetchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: london_metro/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      FunctionName: london-metro-fetch
+      Architectures:
+      - x86_64
+
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Ref: ApplicationResourceGroup
+      AutoConfigurationEnabled: 'true'
+Outputs:
+  LondonMetroFetchFunction:
+    Description: London Metro Fetch Lambda Function ARN
+    Value: !GetAtt LondonMetroFetchFunction.Arn
+  LondonMetroFetchFunctionIamRole:
+    Description: Implicit IAM Role created for London Metro Fetch function
+    Value: !GetAtt LondonMetroFetchFunction.Arn
